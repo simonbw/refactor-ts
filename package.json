@@ -1,0 +1,17 @@
+{
+  "name": "refactor-ts",
+  "version": "0.1.0",
+  "description": "CLI tool for code refactoring operations - renaming/moving symbols and files",
+  "type": "module",
+  "bin": {
+    "refactor-ts": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
