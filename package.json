@@ -7,11 +7,16 @@
     "refactor-ts": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch"
+    "build": "tsgo",
+    "dev": "tsgo --watch",
+    "test": "node --experimental-strip-types --test 'test/**/*.test.ts'"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260115.1",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "ts-morph": "^27.0.2"
   }
 }

@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
 import { parseArgs } from "node:util";
+import { moveFile } from "./commands/move-file.js";
+import { moveSymbol } from "./commands/move-symbol.js";
+import type { Result } from "./types.js";
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -22,17 +25,30 @@ function printHelp() {
 Usage: refactor-ts <command> [options]
 
 Commands:
-  rename-symbol <old> <new>   Rename a symbol across the codebase
-  move-file <src> <dest>      Move a file and update imports
+  move-symbol <file> <symbol> <dest>   Move or rename a symbol
+  move-file <source> <destination>     Move or rename a file and update imports
 
 Options:
   -h, --help      Show this help message
   -v, --version   Show version number
+
+Examples:
+  refactor-ts move-symbol src/utils.ts calcTotal computeTotal   # rename symbol
+  refactor-ts move-symbol src/utils.ts calcTotal src/math.ts    # move to file
+  refactor-ts move-file src/utils.ts src/helpers/utils.ts       # move file
 `);
 }
 
 function printVersion() {
   console.log("refactor-ts v0.1.0");
+}
+
+function output(result: Result) {
+  console.log(JSON.stringify(result));
+}
+
+function error(message: string): Result {
+  return { success: false, filesModified: [], error: message };
 }
 
 async function main() {
@@ -49,18 +65,29 @@ async function main() {
   const [command, ...args] = positionals;
 
   switch (command) {
-    case "rename-symbol":
-      console.log("rename-symbol: not yet implemented");
+    case "move-symbol": {
+      const [file, symbol, destination] = args;
+      if (!file || !symbol || !destination) {
+        output(error("Usage: move-symbol <file> <symbol> <destination>"));
+        process.exit(1);
+      }
+      output(await moveSymbol(file, symbol, destination));
       break;
-    case "move-file":
-      console.log("move-file: not yet implemented");
+    }
+    case "move-file": {
+      const [source, destination] = args;
+      if (!source || !destination) {
+        output(error("Usage: move-file <source> <destination>"));
+        process.exit(1);
+      }
+      output(await moveFile(source, destination));
       break;
+    }
     case undefined:
       printHelp();
       break;
     default:
-      console.error(`Unknown command: ${command}`);
-      printHelp();
+      output(error(`Unknown command: ${command}`));
       process.exit(1);
   }
 }

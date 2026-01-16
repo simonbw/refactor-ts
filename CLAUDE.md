@@ -2,6 +2,10 @@
 
 CLI tool for agents to perform code refactoring operations like renaming/moving symbols and files.
 
+## Important
+
+Keep README.md up-to-date whenever making changes to the project (new commands, changed usage, etc.).
+
 ## Build & Run
 
 ```bash
