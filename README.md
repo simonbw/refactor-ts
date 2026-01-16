@@ -8,10 +8,10 @@ A CLI tool for performing code refactoring operations like renaming symbols and 
 
 ```bash
 # Install from GitHub
-npm install github:simonw/refactor-ts
+npm install github:simonbw/refactor-ts
 
 # Or with full git URL
-npm install git+https://github.com/simonw/refactor-ts.git
+npm install git+https://github.com/simonbw/refactor-ts.git
 ```
 
 After install, the `refactor-ts` command is available via `npx refactor-ts` or directly if `node_modules/.bin` is in PATH.
