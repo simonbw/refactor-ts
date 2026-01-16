@@ -9,7 +9,9 @@
   "scripts": {
     "build": "tsgo",
     "dev": "tsgo --watch",
-    "test": "node --experimental-strip-types --test 'test/**/*.test.ts'"
+    "test": "node --experimental-strip-types --test 'test/**/*.test.ts'",
+    "prepare": "npm run build",
+    "postinstall": "node scripts/postinstall.js"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -4,6 +4,22 @@ A CLI tool for performing code refactoring operations like renaming symbols and 
 
 ## Installation
 
+### From GitHub
+
+```bash
+# Install from GitHub
+npm install github:simonw/refactor-ts
+
+# Or with full git URL
+npm install git+https://github.com/simonw/refactor-ts.git
+```
+
+After install, the `refactor-ts` command is available via `npx refactor-ts` or directly if `node_modules/.bin` is in PATH.
+
+The installer will prompt to install a Claude Code skill that teaches agents how to use the tool.
+
+### Local Development
+
 ```bash
 npm install
 npm run build
