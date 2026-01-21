@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { parseArgs } from "node:util";
+import { moveDirectory } from "./commands/move-directory.js";
 import { moveFile } from "./commands/move-file.js";
 import { moveSymbol } from "./commands/move-symbol.js";
 import type { Result } from "./types.js";
@@ -27,6 +28,7 @@ Usage: refactor-ts <command> [options]
 Commands:
   move-symbol <file> <symbol> <dest>   Move or rename a symbol
   move-file <source> <destination>     Move or rename a file and update imports
+  move-directory <source> <dest>       Move or rename a directory and update imports
 
 Options:
   -h, --help      Show this help message
@@ -36,6 +38,7 @@ Examples:
   refactor-ts move-symbol src/utils.ts calcTotal computeTotal   # rename symbol
   refactor-ts move-symbol src/utils.ts calcTotal src/math.ts    # move to file
   refactor-ts move-file src/utils.ts src/helpers/utils.ts       # move file
+  refactor-ts move-directory src/utils src/helpers              # move directory
 `);
 }
 
@@ -81,6 +84,15 @@ async function main() {
         process.exit(1);
       }
       output(await moveFile(source, destination));
+      break;
+    }
+    case "move-directory": {
+      const [source, destination] = args;
+      if (!source || !destination) {
+        output(error("Usage: move-directory <source> <destination>"));
+        process.exit(1);
+      }
+      output(await moveDirectory(source, destination));
       break;
     }
     case undefined:

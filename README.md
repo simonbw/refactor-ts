@@ -35,10 +35,11 @@ All commands output JSON for easy parsing by agents.
 
 ## Commands
 
-| Command                              | Description                              |
-| ------------------------------------ | ---------------------------------------- |
-| `move-symbol <file> <symbol> <dest>` | Move or rename a symbol                  |
-| `move-file <source> <destination>`   | Move or rename a file and update imports |
+| Command                              | Description                                   |
+| ------------------------------------ | --------------------------------------------- |
+| `move-symbol <file> <symbol> <dest>` | Move or rename a symbol                       |
+| `move-file <source> <destination>`   | Move or rename a file and update imports      |
+| `move-directory <source> <dest>`     | Move or rename a directory and update imports |
 
 ### Examples
 
@@ -51,6 +52,9 @@ npx refactor-ts move-symbol src/utils.ts calculateTotal src/math.ts
 
 # Move or rename a file
 npx refactor-ts move-file src/utils.ts src/helpers/utils.ts
+
+# Move or rename a directory
+npx refactor-ts move-directory src/utils src/helpers
 ```
 
 ### Output Format
