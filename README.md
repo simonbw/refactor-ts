@@ -40,6 +40,7 @@ All commands output JSON for easy parsing by agents.
 | `move-symbol <file> <symbol> <dest>` | Move or rename a symbol                       |
 | `move-file <source> <destination>`   | Move or rename a file and update imports      |
 | `move-directory <source> <dest>`     | Move or rename a directory and update imports |
+| `batch [--dry-run]`                  | Execute multiple operations from JSONL stdin  |
 
 ### Examples
 
@@ -55,7 +56,46 @@ npx refactor-ts move-file src/utils.ts src/helpers/utils.ts
 
 # Move or rename a directory
 npx refactor-ts move-directory src/utils src/helpers
+
+# Batch operations from JSONL stdin
+echo '{"op": "move-file", "src": "src/old.ts", "dest": "src/new.ts"}' | npx refactor-ts batch
+cat operations.jsonl | npx refactor-ts batch --dry-run
 ```
+
+### Batch Command
+
+The `batch` command executes multiple refactoring operations from JSONL input (one JSON object per line). This is optimized for agents that need to perform many operations efficiently - a single ts-morph project instance is shared across all operations.
+
+**Input format (JSONL via stdin):**
+```jsonl
+{"op": "move-file", "src": "src/old.ts", "dest": "src/new.ts"}
+{"op": "move-symbol", "file": "src/utils.ts", "symbol": "oldName", "dest": "newName"}
+{"op": "move-directory", "src": "src/lib", "dest": "src/helpers"}
+```
+
+**Output format:**
+```json
+{
+  "success": true,
+  "operations": [
+    { "index": 0, "operation": {...}, "result": {...} }
+  ],
+  "summary": {
+    "total": 3,
+    "succeeded": 3,
+    "failed": 0,
+    "filesModified": [...]
+  }
+}
+```
+
+**Options:**
+- `--dry-run`: Execute operations in memory without saving changes to disk
+
+**Behavior:**
+- Operations execute sequentially; later operations see changes from earlier ones
+- Continues on error and reports all results
+- Exit code is 0 only if all operations succeed
 
 ### Output Format
 

@@ -2,17 +2,22 @@ import path from "node:path";
 import { Project } from "ts-morph";
 import type { Result } from "../types.js";
 
-export async function moveDirectory(
+export interface MoveDirectoryOptions {
+  save?: boolean;
+}
+
+export async function moveDirectoryWithProject(
+  project: Project,
   source: string,
-  destination: string
+  destination: string,
+  options: MoveDirectoryOptions = {}
 ): Promise<Result> {
+  const { save = true } = options;
+
   try {
     const cwd = process.cwd();
     const absoluteSource = path.resolve(cwd, source);
     const absoluteDestination = path.resolve(cwd, destination);
-
-    const project = new Project();
-    project.addSourceFilesAtPaths("**/*.{ts,tsx}");
 
     const directory = project.getDirectory(absoluteSource);
     if (!directory) {
@@ -30,7 +35,9 @@ export async function moveDirectory(
       .filter((sf) => !sf.isSaved())
       .map((sf) => sf.getFilePath());
 
-    await project.save();
+    if (save) {
+      await project.save();
+    }
 
     return {
       success: true,
@@ -44,4 +51,13 @@ export async function moveDirectory(
       error: err instanceof Error ? err.message : String(err),
     };
   }
+}
+
+export async function moveDirectory(
+  source: string,
+  destination: string
+): Promise<Result> {
+  const project = new Project();
+  project.addSourceFilesAtPaths("**/*.{ts,tsx}");
+  return moveDirectoryWithProject(project, source, destination, { save: true });
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { parseArgs } from "node:util";
+import { batch } from "./commands/batch.js";
 import { moveDirectory } from "./commands/move-directory.js";
 import { moveFile } from "./commands/move-file.js";
 import { moveSymbol } from "./commands/move-symbol.js";
@@ -17,6 +18,9 @@ const { values, positionals } = parseArgs({
       type: "boolean",
       short: "v",
     },
+    "dry-run": {
+      type: "boolean",
+    },
   },
 });
 
@@ -29,16 +33,22 @@ Commands:
   move-symbol <file> <symbol> <dest>   Move or rename a symbol
   move-file <source> <destination>     Move or rename a file and update imports
   move-directory <source> <dest>       Move or rename a directory and update imports
+  batch [--dry-run]                    Execute multiple operations from JSONL stdin
 
 Options:
   -h, --help      Show this help message
   -v, --version   Show version number
+  --dry-run       For batch: execute in memory without saving changes
 
 Examples:
   refactor-ts move-symbol src/utils.ts calcTotal computeTotal   # rename symbol
   refactor-ts move-symbol src/utils.ts calcTotal src/math.ts    # move to file
   refactor-ts move-file src/utils.ts src/helpers/utils.ts       # move file
   refactor-ts move-directory src/utils src/helpers              # move directory
+
+  # Batch operations from stdin (JSONL format):
+  echo '{"op": "move-file", "src": "src/old.ts", "dest": "src/new.ts"}' | refactor-ts batch
+  cat operations.jsonl | refactor-ts batch --dry-run
 `);
 }
 
@@ -93,6 +103,14 @@ async function main() {
         process.exit(1);
       }
       output(await moveDirectory(source, destination));
+      break;
+    }
+    case "batch": {
+      const result = await batch({ dryRun: values["dry-run"] });
+      console.log(JSON.stringify(result));
+      if (!result.success) {
+        process.exit(1);
+      }
       break;
     }
     case undefined:

@@ -2,6 +2,10 @@ import path from "node:path";
 import { Project, type SourceFile, type ExportedDeclarations } from "ts-morph";
 import type { Result } from "../types.js";
 
+export interface MoveSymbolOptions {
+  save?: boolean;
+}
+
 function isFilePath(str: string): boolean {
   return str.endsWith(".ts") || str.endsWith(".tsx");
 }
@@ -19,8 +23,11 @@ async function renameSymbol(
   project: Project,
   sourceFile: SourceFile,
   symbolName: string,
-  newName: string
+  newName: string,
+  options: MoveSymbolOptions = {}
 ): Promise<Result> {
+  const { save = true } = options;
+
   const declaration = findExportedSymbol(sourceFile, symbolName);
   if (!declaration) {
     return {
@@ -53,7 +60,9 @@ async function renameSymbol(
     .filter((sf) => !sf.isSaved())
     .map((sf) => sf.getFilePath());
 
-  await project.save();
+  if (save) {
+    await project.save();
+  }
 
   return {
     success: true,
@@ -66,8 +75,11 @@ async function moveSymbolToFile(
   project: Project,
   sourceFile: SourceFile,
   symbolName: string,
-  destPath: string
+  destPath: string,
+  options: MoveSymbolOptions = {}
 ): Promise<Result> {
+  const { save = true } = options;
+
   const declaration = findExportedSymbol(sourceFile, symbolName);
   if (!declaration) {
     return {
@@ -143,7 +155,9 @@ async function moveSymbolToFile(
     .filter((sf) => !sf.isSaved())
     .map((sf) => sf.getFilePath());
 
-  await project.save();
+  if (save) {
+    await project.save();
+  }
 
   return {
     success: true,
@@ -152,17 +166,16 @@ async function moveSymbolToFile(
   };
 }
 
-export async function moveSymbol(
+export async function moveSymbolWithProject(
+  project: Project,
   file: string,
   symbol: string,
-  destination: string
+  destination: string,
+  options: MoveSymbolOptions = {}
 ): Promise<Result> {
   try {
     const cwd = process.cwd();
     const absoluteSource = path.resolve(cwd, file);
-
-    const project = new Project();
-    project.addSourceFilesAtPaths("**/*.{ts,tsx}");
 
     const sourceFile = project.getSourceFile(absoluteSource);
     if (!sourceFile) {
@@ -174,9 +187,9 @@ export async function moveSymbol(
     }
 
     if (isFilePath(destination)) {
-      return moveSymbolToFile(project, sourceFile, symbol, destination);
+      return moveSymbolToFile(project, sourceFile, symbol, destination, options);
     } else {
-      return renameSymbol(project, sourceFile, symbol, destination);
+      return renameSymbol(project, sourceFile, symbol, destination, options);
     }
   } catch (err) {
     return {
@@ -185,4 +198,14 @@ export async function moveSymbol(
       error: err instanceof Error ? err.message : String(err),
     };
   }
+}
+
+export async function moveSymbol(
+  file: string,
+  symbol: string,
+  destination: string
+): Promise<Result> {
+  const project = new Project();
+  project.addSourceFilesAtPaths("**/*.{ts,tsx}");
+  return moveSymbolWithProject(project, file, symbol, destination, { save: true });
 }
